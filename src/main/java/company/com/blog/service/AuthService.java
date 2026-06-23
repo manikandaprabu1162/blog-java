@@ -4,6 +4,7 @@ import company.com.blog.dto.LoginRequest;
 import company.com.blog.dto.RegisterRequest;
 import company.com.blog.entity.User;
 import company.com.blog.repository.UserRepository;
+import company.com.blog.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,18 +22,16 @@ public class AuthService {
 
   @Autowired private AuthenticationManager authenticationManager;
 
+  @Autowired private JwtUtil jwtUtil;
+
   public User register(RegisterRequest request) {
-    // Check if username exists
     if (userRepository.existsByUsername(request.getUsername())) {
       throw new RuntimeException("Username already exists!");
     }
-
-    // Check if email exists
     if (userRepository.existsByEmail(request.getEmail())) {
       throw new RuntimeException("Email already exists!");
     }
 
-    // Create new user
     User user = new User();
     user.setUsername(request.getUsername());
     user.setEmail(request.getEmail());
@@ -48,8 +47,9 @@ public class AuthService {
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-
     SecurityContextHolder.getContext().setAuthentication(authentication);
-    return "Login successful! Welcome " + request.getUsername();
+
+    // Generate JWT token
+    return jwtUtil.generateToken(request.getUsername());
   }
 }

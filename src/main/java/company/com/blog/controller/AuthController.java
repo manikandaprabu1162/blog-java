@@ -25,20 +25,31 @@ public class AuthController {
       User user = authService.register(request);
       return ResponseEntity.ok(
           new AuthResponse(
-              "User registered successfully!", user.getUsername(), user.getRole(), true));
+              "User registered successfully!",
+              user.getUsername(),
+              user.getRole(),
+              null, // No token on registration
+              true));
     } catch (RuntimeException e) {
-      return ResponseEntity.badRequest().body(new AuthResponse(e.getMessage(), null, null, false));
+      return ResponseEntity.badRequest()
+          .body(new AuthResponse(e.getMessage(), null, null, null, false));
     }
   }
 
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody LoginRequest request) {
     try {
-      String message = authService.login(request);
-      return ResponseEntity.ok(new AuthResponse(message, request.getUsername(), "USER", true));
+      String token = authService.login(request);
+      return ResponseEntity.ok(
+          new AuthResponse(
+              "Login successful!",
+              request.getUsername(),
+              "USER",
+              token, // Send token to client
+              true));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body(new AuthResponse("Invalid username or password!", null, null, false));
+          .body(new AuthResponse("Invalid username or password!", null, null, null, false));
     }
   }
 }
