@@ -17,47 +17,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+  @Autowired private AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            User user = authService.register(request);
-            return ResponseEntity.ok(new AuthResponse(
-                "User registered successfully!",
-                user.getUsername(),
-                user.getRole(),
-                true
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new AuthResponse(
-                e.getMessage(),
-                null,
-                null,
-                false
-            ));
-        }
+  @PostMapping("/register")
+  public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    try {
+      User user = authService.register(request);
+      return ResponseEntity.ok(
+          new AuthResponse(
+              "User registered successfully!", user.getUsername(), user.getRole(), true));
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(new AuthResponse(e.getMessage(), null, null, false));
     }
+  }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            String message = authService.login(request);
-            return ResponseEntity.ok(new AuthResponse(
-                message,
-                request.getUsername(),
-                "USER",
-                true
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new AuthResponse(
-                    "Invalid username or password!",
-                    null,
-                    null,
-                    false
-                ));
-        }
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    try {
+      String message = authService.login(request);
+      return ResponseEntity.ok(new AuthResponse(message, request.getUsername(), "USER", true));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new AuthResponse("Invalid username or password!", null, null, false));
     }
+  }
 }
